@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+	<script type="text/javascript" src="Neuron.js" charset="utf-8"></script>
+	<script type="text/javascript" src="Network.js" charset="utf-8"></script>
+</head>
+
+<body>
+	<h1>Predict XOR Using ANN</h1>
+	<div style="width:1000px;height:400px;">
+		<h3>Errors for different hidden neurons</h3>
+		<canvas id="errors" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 1 hidden neuron</h3>
+		<canvas id="chart1HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 2 hidden neurons</h3>
+		<canvas id="chart2HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 3 hidden neurons</h3>
+		<canvas id="chart3HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 4 hidden neurons</h3>
+		<canvas id="chart4HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 5 hidden neurons</h3>
+		<canvas id="chart5HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 6 hidden neurons</h3>
+		<canvas id="chart6HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 7 hidden neurons</h3>
+		<canvas id="chart7HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 8 hidden neurons</h3>
+		<canvas id="chart8HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 9 hidden neurons</h3>
+		<canvas id="chart9HiddenNeuron" width="1000" height="400"></canvas>
+		<h3>Actual and predicted outputs with 10 hidden neurons</h3>
+		<canvas id="chart10HiddenNeuron" width="1000" height="400"></canvas>
+	</div>
+	<script type="text/javascript">
+		$(function() {
+			var xorData = [
+				[0, 0, 0],
+				[1, 0, 1],
+				[0, 1, 1],
+				[1, 1, 0]
+			];
+			var labelsForErrors = [];
+			var labelsForDifferentNeurons = [];
+			var testErrors = [];
+			var trainingErrors = [];
+			var rSquareValues = [];
+
+			for(var i = 0; i < 10; i++){
+				var network = new Network(xorData, i+1, 1, 0.0001, 1500, 0.15);
+				network.init();
+				// If you don't set momentum and weight decay values network automatically ignore these processes
+				network.setWeightDecay(0.001);
+				network.setMomentum(0.1);
+				// Training process
+				network.train();
+				trainingErrors.push(network.trainingError);
+				// Test process
+				network.setTestData(xorData);
+				network.test();
+				testErrors.push(network.testError);
+				// calculate rSquare and handle chart data
+				var rSquare = network.getRSquare();
+				labelsForErrors.push(i+1);
+				rSquareValues.push(rSquare[0]);
+				if(labelsForDifferentNeurons.length == 0){
+					for(var j = 0; j < rSquare[1].length; j++){
+						if(j % 10 == 0 || j == rSquare[1].length - 1)
+							labelsForDifferentNeurons.push(j);
+						else
+							labelsForDifferentNeurons.push("");
+					}
+				}
+
+				var mychart = new Chart($("#chart"+(i+1)+"HiddenNeuron"), {
+					type: 'line',
+					data: {
+					labels: labelsForDifferentNeurons,
+					datasets: [
+						getDataset("Actual", "rgba(75,192,192,1)", rSquare[1]),
+						getDataset("Output", "rgba(200,182,182,1)", rSquare[2])
+					]}
+				});
+
+			}
+
+			new Chart($("#errors"), {
+				type: 'line',
+				data: {
+				labels: labelsForErrors,
+				datasets: [
+					getDataset("Training Error", "rgba(75,192,192,1)", trainingErrors),
+					getDataset("Test Error", "rgba(200,182,182,1)", testErrors),
+					getDataset("R Square", "rgba(200,50,182,1)", rSquareValues)
+				]}
+			});
+
+			function getDataset(label, color, data){
+				return {
+					label: label,
+					fill: false,
+					lineTension: 0,
+					backgroundColor: color,
+					borderColor: color,
+					pointBorderWidth: 2,
+					pointHoverRadius: 2,
+					pointHoverBackgroundColor: color,
+					pointHoverBorderColor: color,
+					pointHoverBorderWidth: 2,
+					pointRadius: 1,
+					pointHitRadius: 2,
+					data: data,
+				};
+			}
+		});
+	</script>
+</body>
+</html>
